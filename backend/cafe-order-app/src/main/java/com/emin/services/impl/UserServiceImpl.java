@@ -1,5 +1,6 @@
 package com.emin.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,6 +92,18 @@ public class UserServiceImpl implements IUserService {
         BeanUtils.copyProperties(updatedUser, updatedDto);
 
         return updatedDto;
+    }
+
+    @Override
+    public List<DtoUser> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<DtoUser> dtoUsers = new ArrayList<>();
+        for (User user : users) {
+            DtoUser dtoUser = new DtoUser();
+            BeanUtils.copyProperties(user, dtoUser);
+            dtoUsers.add(dtoUser);
+        }
+        return dtoUsers;
     }
 
 }

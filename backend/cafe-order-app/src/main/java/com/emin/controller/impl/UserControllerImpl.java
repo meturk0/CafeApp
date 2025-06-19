@@ -1,5 +1,7 @@
 package com.emin.controller.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,8 +43,9 @@ public class UserControllerImpl implements IUserController{
         return ResponseEntity.ok(savedUser);
     }
     
-    @Override
+    
     @DeleteMapping("/delete/{id}")
+    @Override
     public ResponseEntity<?> deleteUser(@PathVariable(name="id") Long id) {
         try {
             userService.deleteUserById(id);
@@ -52,13 +55,22 @@ public class UserControllerImpl implements IUserController{
         }
     }
 
+    
     @PutMapping("/update/{id}")
+    @Override
     public ResponseEntity<DtoUser> updateUser(@PathVariable Long id, @RequestBody DtoUser dtoUser) {
         DtoUser updatedUser = userService.updateUser(id, dtoUser);
         if (updatedUser == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @GetMapping("/all")
+    @Override
+    public ResponseEntity<List<DtoUser>> getAllUsers() {
+        List<DtoUser> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
 }

@@ -19,5 +19,7 @@ public class DtoProduct {
     private Integer amount;
 
     private String description;
+
+    private String category;
     
 }

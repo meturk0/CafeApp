@@ -121,5 +121,27 @@ public class OrderServiceImpl implements IOrderService{
         orderRepository.deleteById(id);
     }
 
-    
+    @Override
+    public List<DtoOrder> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        List<DtoOrder> dtoOrders = new ArrayList<>();
+        for (Order order : orders) {
+            DtoOrder dtoOrder = new DtoOrder();
+            BeanUtils.copyProperties(order, dtoOrder);
+            // Ürünleri ekle
+            if (order.getProducts() != null && !order.getProducts().isEmpty()) {
+                for (Product product : order.getProducts()) {
+                    DtoProduct dtoProduct = new DtoProduct();
+                    BeanUtils.copyProperties(product, dtoProduct);
+                    dtoOrder.getProducts().add(dtoProduct);
+                }
+            }
+            // Kullanıcıyı ekle
+            if (order.getUser() != null) {
+                dtoOrder.setUser_id(order.getUser().getId());
+            }
+            dtoOrders.add(dtoOrder);
+        }
+        return dtoOrders;
+    }
 }

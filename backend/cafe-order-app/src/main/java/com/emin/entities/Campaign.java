@@ -1,5 +1,6 @@
 package com.emin.entities;
 
+import java.sql.Date;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -7,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -14,12 +17,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Products")
-@AllArgsConstructor
+@Table(name = "Campaigns")
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
-public class Product {
-    
+public class Campaign {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,22 +30,23 @@ public class Product {
     @Column
     private String name;
 
-    @Column
-    private float price;
+    @Column(nullable = true)
+    private Date start_date;
 
-    @Column
-    private Integer amount;
+    @Column(nullable = true)
+    private Date end_date;
 
-    @Column
+    @Column(nullable = true)
     private String description;
 
     @Column
-    private String category;
+    private float price;
 
-    @ManyToMany(mappedBy = "products")
-    private List<Order> orders;
-
-    @ManyToMany(mappedBy = "products")
-    private List<Campaign> campaigns;
-
+    @ManyToMany
+    @JoinTable(
+        name = "campaigns_products",
+        joinColumns = @JoinColumn(name = "campaign_id"),
+        inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private List<Product> products;
 }

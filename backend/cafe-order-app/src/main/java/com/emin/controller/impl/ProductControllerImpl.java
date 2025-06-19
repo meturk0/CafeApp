@@ -1,5 +1,7 @@
 package com.emin.controller.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,5 +63,12 @@ public class ProductControllerImpl implements IProductController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(updatedProduct);
+    }
+
+    @GetMapping("/all")
+    @Override
+    public ResponseEntity<List<DtoProduct>> getAllProducts() {
+        List<DtoProduct> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
 }

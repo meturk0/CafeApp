@@ -1,5 +1,7 @@
 package com.emin.controller.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,5 +50,11 @@ public class OrderControllerImpl implements IOrderController {
         } catch (RuntimeException ex) {
             return ResponseEntity.status(404).body("Sipariş bulunamadı.");
         }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<DtoOrder>> getAllOrders() {
+        List<DtoOrder> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
     }
 }

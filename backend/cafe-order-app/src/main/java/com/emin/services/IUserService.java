@@ -1,5 +1,7 @@
 package com.emin.services;
 
+import java.util.List;
+
 import com.emin.dto.DtoUser;
 
 public interface IUserService {
@@ -11,5 +13,7 @@ public interface IUserService {
     public void deleteUserById(Long id);
 
     public DtoUser updateUser(Long id, DtoUser dtoUser);
+
+    public List<DtoUser> getAllUsers();
 
 }

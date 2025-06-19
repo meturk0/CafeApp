@@ -1,5 +1,7 @@
 package com.emin.services.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
@@ -72,6 +74,7 @@ public class ProductServiceImpl implements IProductService {
         existingProduct.setPrice(dtoProduct.getPrice());
         existingProduct.setAmount(dtoProduct.getAmount());
         existingProduct.setDescription(dtoProduct.getDescription());
+        existingProduct.setCategory(dtoProduct.getCategory());
 
         Product updatedProduct = productRepository.save(existingProduct);
 
@@ -79,6 +82,18 @@ public class ProductServiceImpl implements IProductService {
         BeanUtils.copyProperties(updatedProduct, updatedDto);
 
         return updatedDto;
+    }
+
+    @Override
+    public List<DtoProduct> getAllProducts() {
+        List<DtoProduct> dtoProducts = new ArrayList<>();
+        List<Product> products = productRepository.findAll();
+        for (Product product : products) {
+            DtoProduct dtoProduct = new DtoProduct();
+            BeanUtils.copyProperties(product, dtoProduct);
+            dtoProducts.add(dtoProduct);
+        }
+        return dtoProducts;
     }
 
 }
