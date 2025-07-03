@@ -31,10 +31,20 @@ const CartScreen = () => {
                 <Text style={styles.cartItemPrice}>{item.price} TL</Text>
             </View>
             <View style={styles.cartItemActions}>
-                {item.id !== 'poşet' && (
-                    <TouchableOpacity onPress={() => remove(item.id)} style={styles.iconBtn}>
+                {(
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (item.quantity > 1) {
+                                decrease(item.id);
+                            } else {
+                                remove(item.id);
+                            }
+                        }}
+                        style={styles.iconBtn}
+                    >
                         <Icon name="delete-outline" size={22} color="#222" />
                     </TouchableOpacity>
+
                 )}
                 <Text style={styles.cartItemQty}>{item.quantity}</Text>
                 <TouchableOpacity onPress={() => increase(item.id)} style={styles.iconBtn}>

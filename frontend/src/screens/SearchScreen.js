@@ -14,14 +14,7 @@ const SearchScreen = () => {
     const { addToCart } = useAddToCart();
 
 
-    const handleAddToCart = (product) => {
-        const found = cart.find(item => item.id === product.id);
-        if (found) {
-            setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
-        } else {
-            setCart([...cart, { ...product, quantity: 1 }]);
-        }
-    };
+
 
     // Arama filtresi
     const filteredProducts = products.filter(item =>
@@ -39,7 +32,7 @@ const SearchScreen = () => {
                 <Icon name="magnify" size={26} color="#888" style={{ marginLeft: 8 }} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Hangi Coffy lezzetini istersin?"
+                    placeholder="Bugün canın ne istiyor?"
                     placeholderTextColor="#aaa"
                     value={search}
                     onChangeText={setSearch}
@@ -66,7 +59,7 @@ const SearchScreen = () => {
                             </TouchableOpacity>
                         </View>
                     )}
-                    style={{ marginBottom: 80 }}
+
                 />
             )}
         </View>

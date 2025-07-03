@@ -13,7 +13,15 @@ const LoginScreen = ({ navigation }) => {
             return;
         }
         const user = await handleLogin(email, password);
-        if (user) navigation.replace('Main');
+        if (user) {
+            if (user.role && user.role.toLowerCase() === 'personel') {
+                navigation.replace('OrdersList');
+            } else if (user.role && user.role.toLowerCase() === 'admin') {
+                navigation.replace('Admin');
+            } else {
+                navigation.replace('Main');
+            }
+        }
     };
 
     return (
