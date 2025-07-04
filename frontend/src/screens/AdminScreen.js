@@ -7,13 +7,13 @@ const AdminScreen = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Admin Paneli</Text>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminUsers')}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminUserScreen')}>
                 <Text style={styles.buttonText}>Kullanıcılar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminProducts')}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminProductScreen')}>
                 <Text style={styles.buttonText}>Ürünler</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminCampaigns')}>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AdminCampaignScreen')}>
                 <Text style={styles.buttonText}>Kampanyalar</Text>
             </TouchableOpacity>
         </View>

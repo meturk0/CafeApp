@@ -79,8 +79,7 @@ const OrderDetailScreen = ({ route }) => {
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={styles.productItem}>
-                        <Text style={styles.productName}>{item.name}</Text>
-                        <Text style={styles.productCount}>x{item.count}</Text>
+                        <Text style={styles.productName}>{item.name} <Text style={styles.productCount}>   x{item.count}</Text> </Text>
                         <Text style={styles.productTotal}>{(item.price * item.count).toFixed(2)} TL</Text>
                     </View>
                 )}

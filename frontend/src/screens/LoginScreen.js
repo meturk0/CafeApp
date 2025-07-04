@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { useLogin } from '../hooks/useLogin';
+import { useUser } from '../context/UserContext';
 
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { handleLogin, loading, error } = useLogin();
+    const { setUser } = useUser();
 
     const onLogin = async () => {
         if (!email || !password) {
@@ -14,6 +16,7 @@ const LoginScreen = ({ navigation }) => {
         }
         const user = await handleLogin(email, password);
         if (user) {
+            setUser(user);
             if (user.role && user.role.toLowerCase() === 'personel') {
                 navigation.replace('OrdersList');
             } else if (user.role && user.role.toLowerCase() === 'admin') {
