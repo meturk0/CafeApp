@@ -35,13 +35,17 @@ public class Order {
     @Column
     private Date date;
 
+    @Column
+    private Float price;
+
+    @Column
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "user_id") // Order tablosunda user_id foreign key olur
     private User user;
 
     @ManyToMany
-    @JoinTable(name="orders_products",
-    joinColumns =  @JoinColumn(name="order_id"), 
-    inverseJoinColumns=@JoinColumn(name="product_id") )
+    @JoinTable(name = "orders_products", joinColumns = @JoinColumn(name = "order_id"), inverseJoinColumns = @JoinColumn(name = "product_id"))
     private List<Product> products;
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,16 +24,16 @@ public class OrderControllerImpl implements IOrderController {
     @Autowired
     private IOrderService orderService;
 
-    @GetMapping(path ="/{id}")
+    @GetMapping(path = "/{id}")
     @Override
-    public DtoOrder getOrderById(@PathVariable(name="id") Long id){
+    public DtoOrder getOrderById(@PathVariable(name = "id") Long id) {
 
         return orderService.getOrderById(id);
     }
 
-    @PostMapping(path="/add")
+    @PostMapping(path = "/add")
     @Override
-    public ResponseEntity<DtoOrder> addOrder(@RequestBody DtoOrder dtoOrder){
+    public ResponseEntity<DtoOrder> addOrder(@RequestBody DtoOrder dtoOrder) {
 
         DtoOrder savedOrder = orderService.addOrder(dtoOrder);
         if (savedOrder == null) {
@@ -43,13 +44,24 @@ public class OrderControllerImpl implements IOrderController {
 
     @Override
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteOrder(@PathVariable(name="id") Long id) {
+    public ResponseEntity<?> deleteOrder(@PathVariable(name = "id") Long id) {
         try {
             orderService.deleteOrderById(id);
             return ResponseEntity.ok("Sipariş başarıyla silindi.");
         } catch (RuntimeException ex) {
             return ResponseEntity.status(404).body("Sipariş bulunamadı.");
         }
+    }
+
+    @Override
+    @PutMapping("/update/{id}")
+    public ResponseEntity<DtoOrder> updateOrder(@PathVariable Long id, @RequestBody DtoOrder dtoOrder) {
+
+        DtoOrder updatedOrder = orderService.updateOrder(id, dtoOrder);
+        if (updatedOrder == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updatedOrder);
     }
 
     @GetMapping("/all")

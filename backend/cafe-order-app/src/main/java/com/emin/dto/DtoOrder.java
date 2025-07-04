@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,6 +17,10 @@ public class DtoOrder {
     private String state;
 
     private Date date;
+
+    private Float price;
+
+    private String description;
 
     private Long user_id;
 

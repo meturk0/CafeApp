@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class Product {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,6 +35,9 @@ public class Product {
 
     @Column
     private String description;
+
+    @Column
+    private String imageLink;
 
     @Column
     private String category;

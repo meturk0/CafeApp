@@ -1,6 +1,5 @@
 package com.emin.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +19,8 @@ public class DtoProduct {
 
     private String description;
 
+    private String imageLink;
+
     private String category;
-    
+
 }

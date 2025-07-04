@@ -17,25 +17,23 @@ import com.emin.controller.IProductController;
 import com.emin.dto.DtoProduct;
 import com.emin.services.IProductService;
 
-import jakarta.validation.Valid;
-
 @RestController
 @RequestMapping("/rest/api/product")
 public class ProductControllerImpl implements IProductController {
-    
+
     @Autowired
     private IProductService productService;
 
     @GetMapping(path = "/{id}")
     @Override
-    public DtoProduct findProductById(@PathVariable(name = "id")Long id){
-        
+    public DtoProduct findProductById(@PathVariable(name = "id") Long id) {
+
         return productService.findProductById(id);
     }
 
     @PostMapping(path = "/add")
     @Override
-    public ResponseEntity<DtoProduct> addProduct(@RequestBody DtoProduct dtoProduct){
+    public ResponseEntity<DtoProduct> addProduct(@RequestBody DtoProduct dtoProduct) {
 
         DtoProduct savedProduct = productService.addProduct(dtoProduct);
         if (savedProduct == null) {
@@ -46,7 +44,7 @@ public class ProductControllerImpl implements IProductController {
 
     @Override
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable(name="id") Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable(name = "id") Long id) {
         try {
             productService.deleteProductById(id);
             return ResponseEntity.ok("Ürün başarıyla silindi.");

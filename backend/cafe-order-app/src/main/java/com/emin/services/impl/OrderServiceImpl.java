@@ -21,7 +21,7 @@ import com.emin.services.IOrderService;
 import jakarta.transaction.Transactional;
 
 @Service
-public class OrderServiceImpl implements IOrderService{
+public class OrderServiceImpl implements IOrderService {
 
     @Autowired
     private OrderRepository orderRepository;
@@ -33,34 +33,34 @@ public class OrderServiceImpl implements IOrderService{
     private UserRepository userRepository;
 
     @Override
-    public DtoOrder getOrderById(Long id){
+    public DtoOrder getOrderById(Long id) {
 
         DtoOrder dtoOrder = new DtoOrder();
         Optional<Order> optional = orderRepository.findById(id);
-        if(optional.isEmpty()){
+        if (optional.isEmpty()) {
             return null;
         }
         Order dbOrder = optional.get();
         BeanUtils.copyProperties(dbOrder, dtoOrder);
 
-        if(dbOrder.getProducts() != null && !dbOrder.getProducts().isEmpty()){
+        if (dbOrder.getProducts() != null && !dbOrder.getProducts().isEmpty()) {
             for (Product product : dbOrder.getProducts()) {
                 DtoProduct dtoProduct = new DtoProduct();
                 BeanUtils.copyProperties(product, dtoProduct);
 
                 dtoOrder.getProducts().add(dtoProduct);
-                
+
             }
         }
 
         return dtoOrder;
     }
 
-    
     @Transactional
     @Override
     public DtoOrder addOrder(DtoOrder dtoOrder) {
-        if (dtoOrder == null) return null;
+        if (dtoOrder == null)
+            return null;
 
         Order order = new Order();
         BeanUtils.copyProperties(dtoOrder, order);
@@ -111,7 +111,6 @@ public class OrderServiceImpl implements IOrderService{
         return savedDto;
     }
 
-
     @Override
     public void deleteOrderById(Long id) {
         Optional<Order> optional = orderRepository.findById(id);
@@ -119,6 +118,39 @@ public class OrderServiceImpl implements IOrderService{
             throw new RuntimeException("Sipariş bulunamadı");
         }
         orderRepository.deleteById(id);
+    }
+
+    @Override
+    public DtoOrder updateOrder(Long id, DtoOrder dtoOrder) {
+
+        Optional<Order> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isEmpty()) {
+            return null;
+        }
+
+        Order existingOrder = optionalOrder.get();
+
+        // Güncellenecek alanları dto'dan al ve mevcut kullanıcıya aktar
+        existingOrder.setState(dtoOrder.getState());
+        existingOrder.setDate(dtoOrder.getDate());
+        existingOrder.setPrice(dtoOrder.getPrice());
+        existingOrder.setDescription(dtoOrder.getDescription());
+        if (dtoOrder.getProducts() != null) {
+            List<Product> productList = new ArrayList<>();
+            for (DtoProduct dtoProduct : dtoOrder.getProducts()) {
+                if (dtoProduct.getId() != null) {
+                    productRepository.findById(dtoProduct.getId()).ifPresent(productList::add);
+                }
+            }
+            existingOrder.setProducts(productList);
+        }
+
+        Order updatedOrder = orderRepository.save(existingOrder);
+
+        DtoOrder updatedDto = new DtoOrder();
+        BeanUtils.copyProperties(updatedOrder, updatedDto);
+
+        return updatedDto;
     }
 
     @Override
