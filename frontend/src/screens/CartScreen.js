@@ -14,10 +14,22 @@ const CartScreen = () => {
     // const [cart, setCart] = useState([]); // Boş sepet için
 
     const increase = (id) => {
-        setCart(cart.map(item => item.id === id ? { ...item, quantity: item.quantity + 1 } : item));
+        setCart(cart.map(item =>
+            item.id === id && item.type === 'campaign'
+                ? { ...item, quantity: item.quantity + 1 }
+                : item.id === id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+        ));
     };
     const decrease = (id) => {
-        setCart(cart => cart.map(item => item.id === id && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item));
+        setCart(cart => cart.map(item =>
+            item.id === id && item.type === 'campaign' && item.quantity > 1
+                ? { ...item, quantity: item.quantity - 1 }
+                : item.id === id && item.quantity > 1
+                    ? { ...item, quantity: item.quantity - 1 }
+                    : item
+        ));
     };
     const remove = (id) => {
         setCart(cart.filter(item => item.id !== id));
@@ -29,23 +41,23 @@ const CartScreen = () => {
             <View style={{ flex: 1 }}>
                 <Text style={styles.cartItemName}>{item.name}</Text>
                 <Text style={styles.cartItemPrice}>{item.price} TL</Text>
+                {item.type === 'campaign' && (
+                    <Text style={{ color: '#275636', fontSize: 13, marginTop: 2 }}>Kampanya Ürünleri: {item.products.map(p => p.name).join(', ')}</Text>
+                )}
             </View>
             <View style={styles.cartItemActions}>
-                {(
-                    <TouchableOpacity
-                        onPress={() => {
-                            if (item.quantity > 1) {
-                                decrease(item.id);
-                            } else {
-                                remove(item.id);
-                            }
-                        }}
-                        style={styles.iconBtn}
-                    >
-                        <Icon name="delete-outline" size={22} color="#222" />
-                    </TouchableOpacity>
-
-                )}
+                <TouchableOpacity
+                    onPress={() => {
+                        if (item.quantity > 1) {
+                            decrease(item.id);
+                        } else {
+                            remove(item.id);
+                        }
+                    }}
+                    style={styles.iconBtn}
+                >
+                    <Icon name="delete-outline" size={22} color="#222" />
+                </TouchableOpacity>
                 <Text style={styles.cartItemQty}>{item.quantity}</Text>
                 <TouchableOpacity onPress={() => increase(item.id)} style={styles.iconBtn}>
                     <Icon name="plus" size={22} color="#222" />
@@ -72,11 +84,6 @@ const CartScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* Adres ve mağaza */}
-            <View style={styles.addressRow}>
-                <Icon name="shopping-outline" size={22} color="#222" style={{ marginRight: 8 }} />
-                <Text style={styles.addressText}>Cafe</Text>
-            </View>
             {/* Sepet */}
             {cart.length === 0 ? (
                 <View style={styles.emptyCart}>
@@ -88,7 +95,7 @@ const CartScreen = () => {
             ) : (
                 <FlatList
                     data={cart}
-                    keyExtractor={item => item.id}
+                    keyExtractor={(item, index) => `${item.id}-${index}`}
                     renderItem={renderCartItem}
                     style={{ marginBottom: 8 }}
                 />
@@ -99,7 +106,7 @@ const CartScreen = () => {
                 <View style={styles.totalWrap}>
                     <Text style={styles.totalText}>{total} TL</Text>
                 </View>
-                <TouchableOpacity style={[styles.checkoutBtn, cart.length === 0 && { backgroundColor: '#e8e8e8' }]} disabled={cart.length === 0}>
+                <TouchableOpacity style={[styles.checkoutBtn, cart.length === 0 && { backgroundColor: '#e8e8e8' }]} disabled={cart.length === 0} onPress={() => navigation.navigate('PaymentScreen')}>
                     <Text style={[styles.checkoutBtnText, cart.length === 0 && { color: '#bfc5cb' }]}>Devam Et</Text>
                 </TouchableOpacity>
             </View>
@@ -110,10 +117,8 @@ const CartScreen = () => {
 const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f5f6fa' },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#275636', paddingHorizontal: 16, paddingTop: 45, paddingBottom: 10 },
+    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#275636', paddingHorizontal: 16, paddingVertical: 19 },
     headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
-    addressRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', padding: 12, marginBottom: 8 },
-    addressText: { fontWeight: 'bold', color: '#222', fontSize: 16 },
     emptyCart: { alignItems: 'center', marginVertical: 32 },
     emptyCartIconWrap: { backgroundColor: '#e8e8e8', borderRadius: 100, padding: 32, marginBottom: 16 },
     emptyCartText: { fontSize: 18, color: '#222', fontWeight: 'bold', marginBottom: 16 },

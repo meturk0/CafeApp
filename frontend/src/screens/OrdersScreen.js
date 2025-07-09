@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useOrders } from '../hooks/useOrders';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 function formatDateTime(dateString) {
     const date = new Date(dateString);
@@ -17,8 +17,14 @@ function formatDateTime(dateString) {
 }
 
 const OrdersScreen = () => {
-    const { orders, loading, error } = useOrders();
+    const { orders, loading, error, fetchOrders } = useOrders();
     const navigation = useNavigation();
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchOrders();
+        }, [fetchOrders])
+    );
 
     const renderItem = ({ item }) => {
         const { date, time } = formatDateTime(item.date);
@@ -59,7 +65,7 @@ const OrdersScreen = () => {
                 <Text>Hata: Siparişler alınamadı.</Text>
             ) : (
                 <FlatList
-                    data={orders}
+                    data={[...(orders || [])].sort((a, b) => new Date(b.date) - new Date(a.date))}
                     keyExtractor={item => item.id.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 24 }}

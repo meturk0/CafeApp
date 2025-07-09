@@ -20,6 +20,8 @@ public class DtoUser {
 
     private String email;
 
+    private String phone_number;
+
     private String password;
 
     @Size(max = 30, message = "Rol en fazla 30 karakter olabilir.")

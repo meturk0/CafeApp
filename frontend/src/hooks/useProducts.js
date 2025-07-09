@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchAllProducts } from '../api/product';
 
 export const useProducts = () => {
@@ -8,7 +8,7 @@ export const useProducts = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
+    const fetchProducts = useCallback(() => {
         setLoading(true);
         fetchAllProducts()
             .then(data => {
@@ -24,12 +24,17 @@ export const useProducts = () => {
             });
     }, []);
 
+    useEffect(() => {
+        fetchProducts();
+    }, [fetchProducts]);
+
     return {
         selectedCategory,
         setSelectedCategory,
         products,
         categories,
         loading,
-        error
+        error,
+        refetch: fetchProducts
     };
 }; 

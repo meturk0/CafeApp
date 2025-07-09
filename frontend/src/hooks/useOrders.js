@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { fetchAllOrders } from '../api/order';
 
 export const useOrders = () => {
@@ -6,7 +6,7 @@ export const useOrders = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
+    const fetchOrders = useCallback(() => {
         setLoading(true);
         fetchAllOrders()
             .then(data => {
@@ -19,5 +19,5 @@ export const useOrders = () => {
             });
     }, []);
 
-    return { orders, loading, error };
+    return { orders, loading, error, fetchOrders };
 }; 

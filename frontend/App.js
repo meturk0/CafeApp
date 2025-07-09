@@ -12,13 +12,15 @@ import AdminUserScreen from './src/screens/AdminUserScreen';
 import { UserProvider } from './src/context/UserContext';
 import SearchScreen from './src/screens/SearchScreen';
 import CampaignsScreen from './src/screens/CampaignsScreen';
+import PaymentScreen from './src/screens/PaymentScreen';
+import CustomerOrdersScreen from './src/screens/CustomerOrdersScreen';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <CartProvider>
-      <UserProvider>
+    <UserProvider>
+      <CartProvider>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -31,9 +33,11 @@ export default function App() {
             <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
             <Stack.Screen name="AdminProductScreen" component={SearchScreen} />
             <Stack.Screen name="AdminCampaignScreen" component={CampaignsScreen} />
+            <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+            <Stack.Screen name="CustomerOrders" component={CustomerOrdersScreen} />
           </Stack.Navigator>
         </NavigationContainer>
-      </UserProvider>
-    </CartProvider>
+      </CartProvider>
+    </UserProvider>
   );
 }

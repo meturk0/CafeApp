@@ -38,6 +38,9 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column
+    private String phone_number;
+
     @Size(max = 30, message = "Parola en fazla 30 karakter olabilir.")
     @Column
     private String password;

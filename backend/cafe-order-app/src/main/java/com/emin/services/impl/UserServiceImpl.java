@@ -15,27 +15,26 @@ import com.emin.entities.User;
 import com.emin.repository.UserRepository;
 import com.emin.services.IUserService;
 
-
 @Service
 public class UserServiceImpl implements IUserService {
-    
+
     @Autowired
     private UserRepository userRepository;
 
     @Override
-    public DtoUser findUserById(Long id){
+    public DtoUser findUserById(Long id) {
         DtoUser dtoUser = new DtoUser();
         Optional<User> optional = userRepository.findById(id);
-        if(optional.isEmpty()){
+        if (optional.isEmpty()) {
             return null;
         }
         User user = optional.get();
 
-        List <Order> dbOrders= optional.get().getOrders();
+        List<Order> dbOrders = optional.get().getOrders();
 
         BeanUtils.copyProperties(user, dtoUser);
-        if(dbOrders != null && !dbOrders.isEmpty()){
-            for(Order order : dbOrders){
+        if (dbOrders != null && !dbOrders.isEmpty()) {
+            for (Order order : dbOrders) {
                 DtoOrder dtoOrder = new DtoOrder();
                 BeanUtils.copyProperties(order, dtoOrder);
                 dtoUser.getOrders().add(dtoOrder);
@@ -83,6 +82,7 @@ public class UserServiceImpl implements IUserService {
         existingUser.setName(dtoUser.getName());
         existingUser.setSurname(dtoUser.getSurname());
         existingUser.setEmail(dtoUser.getEmail());
+        existingUser.setPhone_number(dtoUser.getPhone_number());
         existingUser.setPassword(dtoUser.getPassword());
         existingUser.setRole(dtoUser.getRole());
 

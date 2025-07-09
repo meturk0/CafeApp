@@ -7,7 +7,7 @@ const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const { handleLogin, loading, error } = useLogin();
-    const { setUser } = useUser();
+    const { setUser, setUserId } = useUser();
 
     const onLogin = async () => {
         if (!email || !password) {
@@ -17,10 +17,13 @@ const LoginScreen = ({ navigation }) => {
         const user = await handleLogin(email, password);
         if (user) {
             setUser(user);
+            if (user.id) setUserId(user.id);
             if (user.role && user.role.toLowerCase() === 'personel') {
                 navigation.replace('OrdersList');
             } else if (user.role && user.role.toLowerCase() === 'admin') {
                 navigation.replace('Admin');
+            } else if (user.role && user.role.toLowerCase() === 'müşteri') {
+                navigation.replace('Main');
             } else {
                 navigation.replace('Main');
             }

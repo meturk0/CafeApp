@@ -4,22 +4,24 @@ import { useRegister } from '../hooks/useRegister';
 
 const RegisterScreen = ({ navigation }) => {
     const [name, setName] = useState('');
+    const [surname, setSurname] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const { handleRegister, loading, error } = useRegister();
 
     const onRegister = async () => {
-        if (!name || !email || !phone || !password) {
+        if (!name || !surname || !email || !phone || !password) {
             // local error
             return;
         }
         const result = await handleRegister({
-            name: name.split(' ')[0],
-            surname: name.split(' ').slice(1).join(' ') || '-',
+            name,
+            surname,
             email,
+            phone_number: phone,
             password,
-            role: 'admin',
+            role: 'Müşteri',
         });
         if (result) navigation.goBack();
     };
@@ -28,15 +30,22 @@ const RegisterScreen = ({ navigation }) => {
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
             <View style={styles.logoContainer}>
                 <Image source={require('../../assets/cafe.png')} style={styles.logo} />
-                <Text style={styles.title}>Kayıt Ol</Text>
+                <Text style={styles.title}>blnk.</Text>
             </View>
             <View style={styles.form}>
                 <TextInput
                     style={styles.input}
-                    placeholder="Ad Soyad"
+                    placeholder="Ad"
                     placeholderTextColor="#888"
                     value={name}
                     onChangeText={setName}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Soyad"
+                    placeholderTextColor="#888"
+                    value={surname}
+                    onChangeText={setSurname}
                 />
                 <TextInput
                     style={styles.input}
@@ -79,7 +88,7 @@ const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f7f7fa', justifyContent: 'center' },
     logoContainer: { alignItems: 'center', marginBottom: 32 },
     logo: { width: 100, height: 100, resizeMode: 'contain', marginBottom: 8 },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', letterSpacing: 2 },
+    title: { color: '#275636', fontSize: 25, fontFamily: 'sans-serif', fontWeight: 'bold', letterSpacing: 1 },
     form: { paddingHorizontal: 32 },
     input: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 16, fontSize: 16, borderWidth: 1, borderColor: '#e0e0e0' },
     button: { backgroundColor: '#275636', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 8 },

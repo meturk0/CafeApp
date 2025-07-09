@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { fetchAllCampaigns } from '../api/campaign';
 
 export const useCampaigns = () => {
@@ -6,7 +6,7 @@ export const useCampaigns = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
+    const fetchCampaigns = useCallback(() => {
         setLoading(true);
         fetchAllCampaigns()
             .then(data => {
@@ -19,5 +19,9 @@ export const useCampaigns = () => {
             });
     }, []);
 
-    return { campaigns, loading, error };
+    useEffect(() => {
+        fetchCampaigns();
+    }, [fetchCampaigns]);
+
+    return { campaigns, loading, error, refetch: fetchCampaigns };
 }; 

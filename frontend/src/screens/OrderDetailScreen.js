@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Pressable } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Pressable, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import { updateOrder, deleteOrder } from '../api/order';
 
 const OrderDetailScreen = ({ route }) => {
     const { order } = route.params;
@@ -24,6 +25,33 @@ const OrderDetailScreen = ({ route }) => {
         orderTotal = order.products.reduce((sum, p) => sum + (p.price || 0), 0);
     }
     const navigation = useNavigation();
+    const handleStatusChange = (newState) => {
+        Alert.alert(
+            'Onay',
+            `"${newState}" durumuna geçirmek istediğinize emin misiniz?`,
+            [
+                { text: 'Hayır', style: 'cancel' },
+                {
+                    text: 'Evet',
+                    onPress: async () => {
+                        setSelectedState(newState);
+                        setStatusModalVisible(false);
+                        try {
+                            await updateOrder(order.id, {
+                                state: newState,
+                                date: order.date,
+                                price: order.price,
+                                description: order.description,
+                                products: order.products?.map(p => ({ id: p.id })) || [],
+                            });
+                        } catch (err) {
+                            Alert.alert('Hata', err.message || 'Sipariş durumu güncellenemedi');
+                        }
+                    }
+                }
+            ]
+        );
+    };
     return (
         <View style={styles.container}>
             <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
@@ -44,10 +72,7 @@ const OrderDetailScreen = ({ route }) => {
                         <Pressable
                             key={option}
                             style={({ pressed }) => [styles.modalOption, pressed && { backgroundColor: '#e8e8e8' }]}
-                            onPress={() => {
-                                setSelectedState(option);
-                                setStatusModalVisible(false);
-                            }}
+                            onPress={() => handleStatusChange(option)}
                         >
                             <Text style={styles.modalOptionText}>{option}</Text>
                         </Pressable>
@@ -89,13 +114,35 @@ const OrderDetailScreen = ({ route }) => {
                 <Text style={styles.orderTotalLabel}>Toplam Tutar:</Text>
                 <Text style={styles.orderTotalValue}>{orderTotal != null ? orderTotal + ' TL' : '-'}</Text>
             </View>
+            <TouchableOpacity style={styles.deleteBtn} onPress={() => {
+                Alert.alert(
+                    'Siparişi Sil',
+                    'Bu siparişi silmek istediğinize emin misiniz?',
+                    [
+                        { text: 'Vazgeç', style: 'cancel' },
+                        {
+                            text: 'Evet', style: 'destructive', onPress: async () => {
+                                try {
+                                    await deleteOrder(order.id);
+                                    Alert.alert('Başarılı', 'Sipariş silindi.');
+                                    navigation.goBack(); // veya navigation.navigate('OrdersScreen')
+                                } catch (err) {
+                                    Alert.alert('Hata', err.message || 'Sipariş silinemedi');
+                                }
+                            }
+                        }
+                    ]
+                );
+            }}>
+                <Text style={styles.deleteBtnText}>Siparişi Sil</Text>
+            </TouchableOpacity>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f7f7fa', padding: 16 },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', marginBottom: 10, marginTop: 30, textAlign: 'center' },
+    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', marginBottom: 10, textAlign: 'center' },
     infoCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20, marginBottom: 16, marginTop: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
     infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
     infoLabel: { color: '#888', fontSize: 15, flex: 1 },
@@ -129,7 +176,19 @@ const styles = StyleSheet.create({
     modalOptionText: { fontSize: 16, color: '#222' },
     modalCancel: { marginTop: 10 },
     modalCancelText: { color: '#e53935', fontWeight: 'bold', fontSize: 16 },
-    backBtn: { position: 'absolute', top: 45, left: 10, zIndex: 10, backgroundColor: '#fff', borderRadius: 20, padding: 4, elevation: 2 },
+    backBtn: { position: 'absolute', top: 16, left: 10, zIndex: 10, backgroundColor: '#fff', borderRadius: 20, padding: 4, elevation: 2 },
+    deleteBtn: {
+        backgroundColor: '#e53935',
+        borderRadius: 10,
+        paddingVertical: 14,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    deleteBtnText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
 });
 
 export default OrderDetailScreen; 

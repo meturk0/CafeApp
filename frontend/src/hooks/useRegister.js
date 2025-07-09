@@ -5,11 +5,11 @@ export const useRegister = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleRegister = async ({ name, surname, email, password, role = 'customer' }) => {
+    const handleRegister = async ({ name, surname, email, phone_number, password, role = 'customer' }) => {
         setError('');
         setLoading(true);
         try {
-            await registerUser({ name, surname, email, password, role });
+            await registerUser({ name, surname, email, phone_number, password, role });
             setLoading(false);
             return true;
         } catch (err) {
