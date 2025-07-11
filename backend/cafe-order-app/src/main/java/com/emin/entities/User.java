@@ -41,13 +41,15 @@ public class User {
     @Column
     private String phone_number;
 
-    @Size(max = 30, message = "Parola en fazla 30 karakter olabilir.")
     @Column
     private String password;
 
     @Size(max = 30, message = "Rol en fazla 30 karakter olabilir.")
     @Column
     private String role;
+
+    @Column
+    private boolean activity = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Order> orders;

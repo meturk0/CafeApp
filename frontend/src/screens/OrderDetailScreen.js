@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, Pressable, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Modal, Pressable, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { updateOrder, deleteOrder } from '../api/order';
+import { fetchUserById } from '../api/user';
+import styles from '../styles/OrderDetailScreenStyles';
 
+// Sipariş detay ekranı: Siparişin ürünleri, durumu ve kullanıcı bilgisi gösterilir
 const OrderDetailScreen = ({ route }) => {
     const { order } = route.params;
+    // Durum değiştirme modalı ve seçili durum
     const [statusModalVisible, setStatusModalVisible] = useState(false);
     const [selectedState, setSelectedState] = useState(order.state);
     const statusOptions = ['Sipariş Alındı', 'Hazırlanıyor', 'Teslim Edildi'];
@@ -25,6 +29,28 @@ const OrderDetailScreen = ({ route }) => {
         orderTotal = order.products.reduce((sum, p) => sum + (p.price || 0), 0);
     }
     const navigation = useNavigation();
+    // Kullanıcı adı state'i
+    const [userName, setUserName] = useState('');
+    const [userLoading, setUserLoading] = useState(true);
+    // Siparişi veren kullanıcıyı getir
+    useEffect(() => {
+        let mounted = true;
+        const getUser = async () => {
+            if (!order.user_id) return;
+            setUserLoading(true);
+            try {
+                const user = await fetchUserById(order.user_id);
+                if (mounted) setUserName(user.name + (user.surname ? ' ' + user.surname : ''));
+            } catch {
+                if (mounted) setUserName('Kullanıcı');
+            } finally {
+                if (mounted) setUserLoading(false);
+            }
+        };
+        getUser();
+        return () => { mounted = false; };
+    }, [order.user_id]);
+    // Sipariş durumunu değiştir
     const handleStatusChange = (newState) => {
         Alert.alert(
             'Onay',
@@ -54,6 +80,7 @@ const OrderDetailScreen = ({ route }) => {
     };
     return (
         <View style={styles.container}>
+            {/* Geri butonu */}
             <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
                 <Icon name="arrow-left" size={28} color="#275636" />
             </TouchableOpacity>
@@ -66,6 +93,7 @@ const OrderDetailScreen = ({ route }) => {
                 </TouchableOpacity>
                 <Text style={styles.currentStatus}>{selectedState}</Text>
             </View>
+            {/* Durum seçenekleri modalı */}
             {statusModalVisible && (
                 <View style={styles.inlineStatusBox}>
                     {statusOptions.map(option => (
@@ -82,10 +110,15 @@ const OrderDetailScreen = ({ route }) => {
                     </Pressable>
                 </View>
             )}
+            {/* Sipariş bilgileri kartı */}
             <View style={styles.infoCard}>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Sipariş No:</Text>
                     <Text style={styles.infoValue}>{order.id}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                    <Text style={styles.infoLabel}>Kullanıcı:</Text>
+                    <Text style={styles.infoValue}>{userLoading ? 'Yükleniyor...' : userName}</Text>
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.infoLabel}>Tarih:</Text>
@@ -99,6 +132,7 @@ const OrderDetailScreen = ({ route }) => {
                 )}
             </View>
             <Text style={styles.subtitle}>Ürünler:</Text>
+            {/* Ürünler listesi */}
             <FlatList
                 data={groupedProducts}
                 keyExtractor={item => item.id.toString()}
@@ -110,10 +144,12 @@ const OrderDetailScreen = ({ route }) => {
                 )}
                 ListEmptyComponent={<Text style={styles.info}>Ürün yok</Text>}
             />
+            {/* Toplam tutar */}
             <View style={styles.orderTotalWrap}>
                 <Text style={styles.orderTotalLabel}>Toplam Tutar:</Text>
                 <Text style={styles.orderTotalValue}>{orderTotal != null ? orderTotal + ' TL' : '-'}</Text>
             </View>
+            {/* Siparişi sil butonu */}
             <TouchableOpacity style={styles.deleteBtn} onPress={() => {
                 Alert.alert(
                     'Siparişi Sil',
@@ -139,56 +175,5 @@ const OrderDetailScreen = ({ route }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f7f7fa', padding: 16 },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', marginBottom: 10, textAlign: 'center' },
-    infoCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20, marginBottom: 16, marginTop: 15, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-    infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-    infoLabel: { color: '#888', fontSize: 15, flex: 1 },
-    infoValue: { color: '#222', fontWeight: 'bold', fontSize: 15, flex: 1, textAlign: 'right' },
-    subtitle: { fontWeight: 'bold', fontSize: 16, marginTop: 16, marginBottom: 4, color: '#275636' },
-    productItem: { backgroundColor: '#fff', borderRadius: 8, padding: 10, marginVertical: 4, flexDirection: 'row', alignItems: 'center' },
-    productName: { fontSize: 15, color: '#222', flex: 1 },
-    productCount: { color: '#888', fontWeight: 'bold', fontSize: 15, marginHorizontal: 8 },
-    productTotal: { color: '#e53935', fontWeight: 'bold', fontSize: 15, minWidth: 70, textAlign: 'right' },
-    info: { color: '#222', fontSize: 15, marginBottom: 2 },
-    orderTotalWrap: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, marginBottom: 15, backgroundColor: '#fff', borderRadius: 12, padding: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-    orderTotalLabel: { fontSize: 18, color: '#888', fontWeight: 'bold' },
-    orderTotalValue: { fontSize: 22, color: '#e53935', fontWeight: 'bold' },
-    statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 15, marginTop: 10 },
-    statusEditBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#e8f5e9', borderRadius: 8, paddingVertical: 6, paddingHorizontal: 12 },
-    statusEditText: { color: '#275636', fontWeight: 'bold', fontSize: 15, marginLeft: 6 },
-    currentStatus: { color: '#222', fontWeight: 'bold', fontSize: 15 },
-    inlineStatusBox: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 10,
-        marginTop: 0,
-        shadowColor: '#000',
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-        alignItems: 'center'
-    },
-    modalOption: { paddingVertical: 10, paddingHorizontal: 16, width: '100%', alignItems: 'center', borderRadius: 8, marginBottom: 6 },
-    modalOptionText: { fontSize: 16, color: '#222' },
-    modalCancel: { marginTop: 10 },
-    modalCancelText: { color: '#e53935', fontWeight: 'bold', fontSize: 16 },
-    backBtn: { position: 'absolute', top: 16, left: 10, zIndex: 10, backgroundColor: '#fff', borderRadius: 20, padding: 4, elevation: 2 },
-    deleteBtn: {
-        backgroundColor: '#e53935',
-        borderRadius: 10,
-        paddingVertical: 14,
-        alignItems: 'center',
-        marginTop: 16,
-    },
-    deleteBtnText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-});
 
 export default OrderDetailScreen; 

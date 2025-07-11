@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Activity
 import { fetchAllUsers, registerUser, deleteUser, updateUser } from '../api/user';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useUser } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
+import styles from '../styles/AdminUserScreenStyles';
 
 const AdminUserScreen = ({ navigation }) => {
     const [users, setUsers] = useState([]);
@@ -18,6 +21,10 @@ const AdminUserScreen = ({ navigation }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [updateModalVisible, setUpdateModalVisible] = useState(false);
     const [updateForm, setUpdateForm] = useState({ name: '', surname: '', email: '', phone_number: '', password: '', role: '' });
+
+    const userContext = typeof useUser === 'function' ? useUser() : {};
+    const authContext = typeof useAuth === 'function' ? useAuth() : {};
+    const user = authContext?.user || userContext?.user;
 
     useEffect(() => {
         const getUsers = async () => {
@@ -174,7 +181,7 @@ const AdminUserScreen = ({ navigation }) => {
                             <Picker.Item label="Rol seçiniz..." value="" />
                             <Picker.Item label="Admin" value="admin" />
                             <Picker.Item label="Personel" value="personel" />
-                            <Picker.Item label="Kullanıcı" value="kullanıcı" />
+                            <Picker.Item label="Müşteri" value="müşteri" />
                         </Picker>
                         {formError ? <Text style={{ color: 'red', marginBottom: 8 }}>{formError}</Text> : null}
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
@@ -223,7 +230,7 @@ const AdminUserScreen = ({ navigation }) => {
                             setActionModalVisible(false);
                             setUpdateModalVisible(true);
                         }}>
-                            <Text style={styles.actionBtnText}>Güncelle</Text>
+                            <Text style={styles.actionBtnText}>Düzenle</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#e53935' }]} onPress={() => {
                             if (!selectedUser) return;
@@ -252,7 +259,7 @@ const AdminUserScreen = ({ navigation }) => {
                             <Text style={[styles.actionBtnText, { color: '#fff' }]}>Sil</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setActionModalVisible(false)}>
-                            <Text style={{ color: '#275636', fontWeight: 'bold' }}>İptal</Text>
+                            <Text style={{ color: '#888', fontWeight: 'bold' }}>Kapat</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -292,13 +299,7 @@ const AdminUserScreen = ({ navigation }) => {
                             value={updateForm.phone_number}
                             onChangeText={text => setUpdateForm({ ...updateForm, phone_number: text })}
                         />
-                        <TextInput
-                            style={styles.modalInput}
-                            placeholder="Şifre"
-                            value={updateForm.password}
-                            onChangeText={text => setUpdateForm({ ...updateForm, password: text })}
-                            secureTextEntry
-                        />
+
                         <Picker
                             selectedValue={updateForm.role}
                             style={styles.modalInput}
@@ -310,7 +311,7 @@ const AdminUserScreen = ({ navigation }) => {
                         </Picker>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8 }}>
                             <Pressable onPress={() => setUpdateModalVisible(false)} style={styles.modalCancelBtn}>
-                                <Text style={{ color: '#275636', fontWeight: 'bold' }}>İptal</Text>
+                                <Text style={{ color: '#275636', fontWeight: 'bold' }}>Kapat</Text>
                             </Pressable>
                             <Pressable
                                 onPress={() => {
@@ -325,7 +326,6 @@ const AdminUserScreen = ({ navigation }) => {
                                                     try {
                                                         await updateUser(selectedUser.id, updateForm);
                                                         setUpdateModalVisible(false);
-                                                        // Listeyi güncelle
                                                         const data = await fetchAllUsers();
                                                         setUsers(data);
                                                         setFilteredUsers(data);
@@ -348,144 +348,5 @@ const AdminUserScreen = ({ navigation }) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'flex-start', alignItems: 'center', backgroundColor: '#f7f7fa', paddingTop: 32 },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', marginBottom: 16, marginTop: 15 },
-    searchRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '90%',
-        marginBottom: 16,
-    },
-    searchInput: {
-        flex: 1,
-        height: 40,
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#fff',
-    },
-    addButton: {
-        marginLeft: 8,
-        backgroundColor: '#275636',
-        borderRadius: 8,
-        width: 40,
-        height: 40,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonText: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginTop: -2,
-    },
-    userItem: {
-        width: '95%',
-        backgroundColor: '#fff',
-        paddingVertical: 14,
-        paddingHorizontal: 18,
-        borderRadius: 12,
-        marginBottom: 14,
-        elevation: 1,
-        flexDirection: 'column',
-        width: 325
-    },
-    userName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 2
-    },
-    userEmail: {
-        fontSize: 16,
-        color: '#555',
-    },
-    subtitle: { fontSize: 18, color: '#222' },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        width: 320,
-        backgroundColor: '#fff',
-        borderRadius: 14,
-        padding: 20,
-        elevation: 5,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#275636',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    modalInput: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        marginBottom: 10,
-        fontSize: 16,
-        backgroundColor: '#f7f7fa',
-    },
-    modalCancelBtn: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        backgroundColor: '#eee',
-        marginRight: 8,
-    },
-    modalSaveBtn: {
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        backgroundColor: '#275636',
-    },
-    modalPicker: {
-        backgroundColor: '#f7f7fa',
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        marginBottom: 10,
-        height: 48,
-        justifyContent: 'center',
-    },
-    actionModalContent: {
-        width: 280,
-        backgroundColor: '#fff',
-        borderRadius: 14,
-        padding: 20,
-        elevation: 5,
-        alignItems: 'center',
-    },
-    actionBtn: {
-        width: '100%',
-        backgroundColor: '#275636',
-        borderRadius: 8,
-        paddingVertical: 12,
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    actionBtnText: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    backBtn: {
-        position: 'absolute',
-        top: 45,
-        left: 16,
-        zIndex: 10,
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 4,
-        elevation: 2,
-    },
-});
 
 export default AdminUserScreen; 

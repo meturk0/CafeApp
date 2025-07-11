@@ -5,7 +5,7 @@ import java.util.List;
 import com.emin.dto.DtoUser;
 
 public interface IUserService {
-    
+
     public DtoUser findUserById(Long id);
 
     public DtoUser addUser(DtoUser dtoUser);
@@ -16,4 +16,5 @@ public interface IUserService {
 
     public List<DtoUser> getAllUsers();
 
+    DtoUser findUserByEmail(String email);
 }

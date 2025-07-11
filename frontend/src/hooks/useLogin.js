@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { fetchAllUsers } from '../api/user';
+import { loginUser } from '../api/user';
 
 export const useLogin = () => {
     const [loading, setLoading] = useState(false);
@@ -9,11 +9,10 @@ export const useLogin = () => {
         setError('');
         setLoading(true);
         try {
-            const users = await fetchAllUsers();
-            const found = users.find(user => user.email === email && user.password === password);
+            const result = await loginUser(email, password); // { token, user }
             setLoading(false);
-            if (found) {
-                return found;
+            if (result && result.token) {
+                return result;
             } else {
                 setError('Geçerli bir mail veya şifre giriniz.');
                 return null;

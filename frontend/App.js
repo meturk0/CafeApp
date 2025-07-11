@@ -14,6 +14,7 @@ import SearchScreen from './src/screens/SearchScreen';
 import CampaignsScreen from './src/screens/CampaignsScreen';
 import PaymentScreen from './src/screens/PaymentScreen';
 import CustomerOrdersScreen from './src/screens/CustomerOrdersScreen';
+import { AuthProvider } from './src/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,20 +23,22 @@ export default function App() {
     <UserProvider>
       <CartProvider>
         <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Main" component={MainTabNavigator} />
-            <Stack.Screen name="CampaignDetail" component={CampaignDetailScreen} />
-            <Stack.Screen name="OrdersList" component={PersonelTabNavigator} />
-            <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
-            <Stack.Screen name="Admin" component={AdminTabNavigator} />
-            <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
-            <Stack.Screen name="AdminProductScreen" component={SearchScreen} />
-            <Stack.Screen name="AdminCampaignScreen" component={CampaignsScreen} />
-            <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
-            <Stack.Screen name="CustomerOrders" component={CustomerOrdersScreen} />
-          </Stack.Navigator>
+          <AuthProvider>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen name="Main" component={MainTabNavigator} />
+              <Stack.Screen name="CampaignDetail" component={CampaignDetailScreen} />
+              <Stack.Screen name="OrdersList" component={PersonelTabNavigator} />
+              <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+              <Stack.Screen name="Admin" component={AdminTabNavigator} />
+              <Stack.Screen name="AdminUserScreen" component={AdminUserScreen} />
+              <Stack.Screen name="AdminProductScreen" component={SearchScreen} />
+              <Stack.Screen name="AdminCampaignScreen" component={CampaignsScreen} />
+              <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
+              <Stack.Screen name="CustomerOrders" component={CustomerOrdersScreen} />
+            </Stack.Navigator>
+          </AuthProvider>
         </NavigationContainer>
       </CartProvider>
     </UserProvider>

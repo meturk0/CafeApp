@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useUser } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../api/order';
 import { useNavigation } from '@react-navigation/native';
+import styles from '../styles/PaymentScreenStyles';
 
+// Ödeme ekranı: Sepet onaylama ve açıklama ekleme
 const PaymentScreen = () => {
+    // State ve contextler
     const [note, setNote] = useState('');
     const [loading, setLoading] = useState(false);
-    const { userId } = useUser();
+    const userContext = typeof useUser === 'function' ? useUser() : {};
+    const authContext = typeof useAuth === 'function' ? useAuth() : {};
+    const userId = authContext?.user?.id || userContext?.userId;
     const { cart, setCart } = useCart();
     const navigation = useNavigation();
 
+    // Sepeti onayla ve siparişi oluştur
     const handleConfirm = async () => {
         if (!cart.length) return;
         setLoading(true);
@@ -48,7 +55,9 @@ const PaymentScreen = () => {
 
     return (
         <View style={styles.container}>
+            {/* Başlık */}
             <Text style={styles.title}>Ödeme Ekranı</Text>
+            {/* Açıklama inputu */}
             <TextInput
                 style={styles.input}
                 placeholder="Açıklama (isteğe bağlı)"
@@ -57,41 +66,12 @@ const PaymentScreen = () => {
                 multiline
                 numberOfLines={3}
             />
+            {/* Sepeti onayla butonu */}
             <TouchableOpacity style={styles.button} onPress={handleConfirm} disabled={loading}>
                 <Text style={styles.buttonText}>{loading ? 'Gönderiliyor...' : 'Sepeti Onayla'}</Text>
             </TouchableOpacity>
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f7f7fa', padding: 24 },
-    title: { fontSize: 28, fontWeight: 'bold', color: '#275636', marginBottom: 32 },
-    input: {
-        width: '100%',
-        minHeight: 60,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 10,
-        padding: 12,
-        fontSize: 16,
-        backgroundColor: '#fff',
-        marginBottom: 24,
-        textAlignVertical: 'top',
-    },
-    button: {
-        backgroundColor: '#275636',
-        borderRadius: 10,
-        paddingVertical: 16,
-        paddingHorizontal: 32,
-        alignItems: 'center',
-        width: '100%',
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 18,
-    },
-});
 
 export default PaymentScreen; 

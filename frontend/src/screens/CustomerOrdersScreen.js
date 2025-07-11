@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity } from 'react-native';
 import { useUser } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
 import { fetchAllOrders } from '../api/order';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
+import styles from '../styles/CustomerOrdersScreenStyles';
 
+// Sipariş tarihini formatlayan yardımcı fonksiyon
 function formatOrderDate(dateString) {
     const date = new Date(dateString);
     const time = date.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Istanbul' });
@@ -13,6 +16,7 @@ function formatOrderDate(dateString) {
     return `${time} , ${day}`;
 }
 
+// Filtre seçenekleri
 const FILTERS = [
     { key: 'daily', label: 'Günlük' },
     { key: 'weekly', label: 'Haftalık' },
@@ -20,13 +24,18 @@ const FILTERS = [
     { key: 'yearly', label: 'Yıllık' },
 ];
 
+// Müşterinin kendi siparişlerini görebileceği ekran
 const CustomerOrdersScreen = () => {
-    const { userId } = useUser();
+    // Kullanıcı ve navigation contextleri
+    const userContext = typeof useUser === 'function' ? useUser() : {};
+    const authContext = typeof useAuth === 'function' ? useAuth() : {};
+    const userId = authContext?.user?.id || userContext?.userId;
     const navigation = useNavigation();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('daily');
 
+    // Siparişleri çek
     useEffect(() => {
         const getOrders = async () => {
             try {
@@ -77,6 +86,7 @@ const CustomerOrdersScreen = () => {
         return orders;
     };
 
+    // Filtrelenmiş siparişler
     const filteredOrders = getFilteredOrders();
 
     if (loading) return <Text>Yükleniyor...</Text>;
@@ -106,6 +116,7 @@ const CustomerOrdersScreen = () => {
                     </Picker>
                 </View>
             </View>
+            {/* Sipariş listesi */}
             <FlatList
                 data={filteredOrders}
                 keyExtractor={item => item.id.toString()}
@@ -132,58 +143,5 @@ const CustomerOrdersScreen = () => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#e8e8e8' },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 5,
-        backgroundColor: '#275636',
-        position: 'relative',
-    },
-    backIcon: {
-        position: 'absolute',
-        left: 12,
-        top: 15,
-        zIndex: 2,
-        padding: 4,
-    },
-    headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', letterSpacing: 1, paddingVertical: 15 },
-    pickerRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        backgroundColor: '#e8e8e8',
-        marginBottom: 8,
-        marginTop: 12,
-    },
-
-    pickerWrapper: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderRadius: 25,
-        overflow: 'hidden',
-        marginLeft: 15,
-        marginRight: 260,
-        height: 36,
-        justifyContent: 'center',
-    },
-    picker: {
-        height: 36,
-        fontWeight: 'bold',
-    },
-
-    orderCard: { backgroundColor: '#fff', borderRadius: 12, padding: 12, margin: 10 },
-    orderId: { fontWeight: 'bold', fontSize: 16, marginBottom: 2 },
-    orderState: {
-        color: '#e53935',
-        fontSize: 13,
-        fontWeight: 'bold',
-        marginLeft: 8,
-    },
-    productsTitle: { marginTop: 8, fontWeight: 'bold', color: '#275636' },
-    productName: { marginLeft: 8, color: '#222' },
-});
 
 export default CustomerOrdersScreen; 

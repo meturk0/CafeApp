@@ -15,12 +15,11 @@ public class DtoProduct {
 
     private float price;
 
-    private Integer amount;
-
     private String description;
 
     private String imageLink;
 
     private String category;
 
+    private boolean activity;
 }

@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../hooks/useProducts';
 import { useAddToCart } from '../hooks/useAddToCart';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import styles from '../styles/HomeScreenStyles';
 
+// Ana sayfa: Kategoriler, ürünler ve ürün detay modalı
 const HomeScreen = () => {
+    // Ürünler, kategoriler ve sepet contextleri
     const { selectedCategory, setSelectedCategory, products, categories, loading, error } = useProducts();
     const navigation = useNavigation();
     const { cart, setCart } = useCart();
     const { addToCart } = useAddToCart();
-
-
+    const [productDetailModalVisible, setProductDetailModalVisible] = useState(false);
+    const [productDetail, setProductDetail] = useState(null);
 
     return (
         <View style={styles.container}>
@@ -48,42 +51,48 @@ const HomeScreen = () => {
                     keyExtractor={(item) => item.id.toString()}
                     contentContainerStyle={styles.productList}
                     renderItem={({ item }) => (
-                        <View style={styles.productCard}>
-                            <Image source={require('../../assets/coffee.jpg')} style={styles.productImage} />
-                            <Text style={styles.productName}>{item.name}</Text>
-                            <Text style={styles.productPrice}>{item.price} TL</Text>
-                            <TouchableOpacity style={styles.addButton} onPress={() => addToCart(item)}>
-                                <FontAwesome name="plus" size={15} color="white" />
-                            </TouchableOpacity>
-                        </View>
+                        <TouchableOpacity onPress={() => { setProductDetail(item); setProductDetailModalVisible(true); }}>
+                            <View style={styles.productCard}>
+                                <Image source={item.imageLink ? { uri: item.imageLink } : require('../../assets/coffee.jpg')} style={styles.productImage} />
+                                <Text style={styles.productName}>{item.name}</Text>
+                                <Text style={styles.productPrice}>{item.price} TL</Text>
+                                <TouchableOpacity style={styles.addButton} onPress={() => addToCart(item)}>
+                                    <FontAwesome name="plus" size={15} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        </TouchableOpacity>
                     )}
                 />
             )}
+            {/* Ürün Detay Modalı */}
+            <Modal
+                visible={productDetailModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setProductDetailModalVisible(false)}
+            >
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                    <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '80%', alignItems: 'center' }}>
+                        {productDetail && (
+                            <>
+                                <Image
+                                    source={productDetail.imageLink ? { uri: productDetail.imageLink } : require('../../assets/coffee.jpg')}
+                                    style={{ width: 150, height: 150, borderRadius: 12, marginBottom: 12 }}
+                                    resizeMode="contain"
+                                />
+                                <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 8 }}>{productDetail.name}</Text>
+                                <Text style={{ color: '#666', fontSize: 15, marginBottom: 8 }}>{productDetail.description || 'Açıklama yok.'}</Text>
+                                <Text style={{ color: '#275636', fontWeight: 'bold', fontSize: 18, marginBottom: 16 }}>{productDetail.price} TL</Text>
+                            </>
+                        )}
+                        <TouchableOpacity onPress={() => setProductDetailModalVisible(false)} style={{ marginTop: 8, padding: 8 }}>
+                            <Text style={{ color: '#275636', fontWeight: 'bold', fontSize: 16 }}>Kapat</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };
-
-const { width } = Dimensions.get('window');
-const cardWidth = (width - 48) / 2;
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#e8e8e8' },
-    header: { flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 16, backgroundColor: '#275636' },
-    logoCircle: { width: 35, height: 35, borderRadius: 22, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
-    headerLogo: { width: 25, height: 25, resizeMode: 'contain' },
-    label: { color: '#fff', fontSize: 20, fontFamily: 'sans-serif', fontWeight: 'bold', letterSpacing: 1 },
-    categoryScroll: { marginHorizontal: 8, marginBottom: 8 },
-    categoryButton: { height: 40, backgroundColor: '#fff', borderRadius: 20, paddingHorizontal: 18, paddingVertical: 8, marginHorizontal: 5, marginVertical: 10, borderWidth: 1, borderColor: '#e0e0e0' },
-    categoryButtonActive: { backgroundColor: '#275636', borderColor: '#275636' },
-    categoryText: { color: '#333', fontWeight: '500', },
-    categoryTextActive: { color: '#ffff', fontWeight: 'bold' },
-    productList: { paddingHorizontal: 8, paddingBottom: 80 },
-    productCard: { backgroundColor: '#fff', borderRadius: 16, padding: 12, margin: 8, alignItems: 'center', width: cardWidth, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-    productImage: { width: 120, height: 120, resizeMode: 'contain', marginBottom: 4 },
-    productName: { fontWeight: 'bold', fontSize: 15, textAlign: 'center', marginBottom: 4 },
-    productPrice: { color: '#275636', fontWeight: 'bold', marginBottom: 8 },
-    addButton: { backgroundColor: '#275636', borderRadius: 16, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', position: 'absolute', bottom: 12, right: 12 },
-    addButtonText: { color: '#fff', fontSize: 22, fontWeight: 'bold', alignItems: 'center', justifyContent: 'center', },
-});
 
 export default HomeScreen; 

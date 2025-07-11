@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, TextInput, Alert, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useUser } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
 import { updateUser } from '../api/user';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from '../styles/AccountScreenStyles';
 
 const AccountScreen = ({ navigation }) => {
-    const { user, userId, setUser } = useUser();
+    const userContext = typeof useUser === 'function' ? useUser() : {};
+    const authContext = typeof useAuth === 'function' ? useAuth() : {};
+    const user = authContext?.user || userContext?.user;
+    const userId = authContext?.user?.id || userContext?.userId;
+    const setUser = userContext?.setUser;
     const [edit, setEdit] = useState(false);
     const [form, setForm] = useState(user || { name: '', surname: '', email: '', phone_number: '', password: '', role: '' });
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [newPasswordAgain, setNewPasswordAgain] = useState('');
 
     useEffect(() => {
         if (user) setForm(user);
@@ -22,14 +33,52 @@ const AccountScreen = ({ navigation }) => {
                 surname: form.surname,
                 email: form.email,
                 phone_number: form.phone_number,
-                password: form.password,
                 role: form.role,
+                // password alanı gönderilmiyor!
             };
             await updateUser(userId, body);
-            setUser({ ...form });
+            if (typeof setUser === 'function') {
+                setUser({ ...user, ...body });
+            }
+            await AsyncStorage.setItem('user', JSON.stringify({ ...user, ...body }));
             Alert.alert('Başarılı', 'Kullanıcı bilgileri güncellendi.');
         } catch (err) {
             Alert.alert('Hata', err.message || 'Güncelleme başarısız');
+        }
+    };
+
+    // Şifre değiştirme işlemi (dummy, backend fonksiyonu ile entegre edilecek)
+    const handlePasswordChange = async () => {
+        if (!oldPassword || !newPassword || !newPasswordAgain) {
+            Alert.alert('Hata', 'Tüm alanları doldurun.');
+            return;
+        }
+        if (newPassword !== newPasswordAgain) {
+            Alert.alert('Hata', 'Yeni şifreler eşleşmiyor.');
+            return;
+        }
+        try {
+            // Mevcut kullanıcı bilgilerini ve yeni şifreyi gönder
+            const body = {
+                name: user.name,
+                surname: user.surname,
+                email: user.email,
+                phone_number: user.phone_number,
+                role: user.role,
+                password: newPassword,
+            };
+            await updateUser(userId, body);
+            if (typeof setUser === 'function') {
+                setUser({ ...user, password: newPassword });
+            }
+            await AsyncStorage.setItem('user', JSON.stringify({ ...user, password: newPassword }));
+            Alert.alert('Başarılı', 'Şifre değiştirildi.');
+            setShowPasswordModal(false);
+            setOldPassword('');
+            setNewPassword('');
+            setNewPasswordAgain('');
+        } catch (err) {
+            Alert.alert('Hata', err.message || 'Şifre değiştirilemedi');
         }
     };
 
@@ -107,26 +156,55 @@ const AccountScreen = ({ navigation }) => {
                         <Text style={styles.value}>{form.phone_number}</Text>
                     )}
                 </View>
-                <View style={styles.infoRow}>
-                    <Text style={styles.label}>Şifre:</Text>
-                    {edit ? (
-                        <TextInput
-                            style={styles.input}
-                            value={form.password}
-                            onChangeText={v => handleChange('password', v)}
-                            secureTextEntry
-                        />
-                    ) : (
-                        <Text style={styles.value}>{'*'.repeat(form.password?.length || 6)}</Text>
-                    )}
-                </View>
+                {/* Şifre alanı kaldırıldı */}
             </View>
             {edit && (
                 <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
                     <Text style={styles.saveBtnText}>Kaydet</Text>
                 </TouchableOpacity>
             )}
-            {user?.role === 'Müşteri' && (
+            {/* Şifre Değiştir Butonu */}
+            <TouchableOpacity onPress={() => setShowPasswordModal(true)}>
+                <Text style={styles.passwordTextBtn}>Şifre Değiştir</Text>
+            </TouchableOpacity>
+            {/* Şifre Değiştir Modalı */}
+            <Modal visible={showPasswordModal} transparent animationType="slide">
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                    <View style={{ backgroundColor: '#fff', padding: 24, borderRadius: 12, width: '80%' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>Şifre Değiştir</Text>
+                        <TextInput
+                            placeholder="Eski Şifre"
+                            value={oldPassword}
+                            onChangeText={setOldPassword}
+                            secureTextEntry
+                            style={[styles.input, { marginBottom: 8 }]}
+                        />
+                        <TextInput
+                            placeholder="Yeni Şifre"
+                            value={newPassword}
+                            onChangeText={setNewPassword}
+                            secureTextEntry
+                            style={[styles.input, { marginBottom: 8 }]}
+                        />
+                        <TextInput
+                            placeholder="Yeni Şifre (Tekrar)"
+                            value={newPasswordAgain}
+                            onChangeText={setNewPasswordAgain}
+                            secureTextEntry
+                            style={[styles.input, { marginBottom: 16 }]}
+                        />
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <TouchableOpacity onPress={() => setShowPasswordModal(false)} style={{ padding: 8 }}>
+                                <Text>İptal</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={handlePasswordChange} style={{ padding: 8 }}>
+                                <Text style={{ color: '#275636', fontWeight: 'bold' }}>Değiştir</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+            {user?.role === 'müşteri' && (
                 <TouchableOpacity style={styles.ordersBtn} onPress={() => navigation.navigate('CustomerOrders')}>
                     <Text style={styles.ordersBtnText}>Siparişlerim</Text>
                 </TouchableOpacity>
@@ -138,38 +216,5 @@ const AccountScreen = ({ navigation }) => {
         </View>
     );
 };
-
-const { width } = Dimensions.get('window');
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#e8e8e8' },
-    header: { alignItems: 'center', justifyContent: 'center', paddingVertical: 8, backgroundColor: '#275636' },
-    headerTitle: { color: '#fff', fontSize: 20, fontWeight: 'bold', letterSpacing: 1, paddingVertical: 12 },
-    editRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginTop: 16, marginBottom: -8 },
-    editIconWrap: { padding: 8 },
-    infoCard: { backgroundColor: '#fff', borderRadius: 16, margin: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-    infoRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 7 },
-    label: { color: '#888', fontWeight: 'bold', fontSize: 15, width: 80 },
-    value: { color: '#222', fontWeight: 'bold', fontSize: 16 },
-    input: { borderBottomWidth: 1, borderColor: '#275636', fontSize: 16, color: '#222', minWidth: width * 0.4, paddingVertical: 2 },
-    saveBtn: { backgroundColor: '#bfc5cb', paddingVertical: 8, paddingHorizontal: 10, alignItems: 'center', marginRight: 45, marginLeft: 290, borderRadius: 5 },
-    saveBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-    logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#e53935', borderRadius: 24, paddingVertical: 14, marginHorizontal: 32, marginTop: 15 },
-    logoutText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
-    ordersBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#275636',
-        borderRadius: 24,
-        paddingVertical: 14,
-        marginHorizontal: 32,
-        marginTop: 30,
-    },
-    ordersBtnText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-});
 
 export default AccountScreen; 

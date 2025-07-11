@@ -31,9 +31,6 @@ public class Product {
     private float price;
 
     @Column
-    private Integer amount;
-
-    @Column
     private String description;
 
     @Column
@@ -41,6 +38,9 @@ public class Product {
 
     @Column
     private String category;
+
+    @Column(nullable = false)
+    private boolean activity = true;
 
     @ManyToMany(mappedBy = "products")
     private List<Order> orders;
